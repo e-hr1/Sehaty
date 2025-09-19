@@ -1,5 +1,4 @@
 <!doctype html>
-
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
@@ -23,56 +22,50 @@
 <body>
   <div class="card">
     <h1>تسجيل الدخول بواسطة Google</h1>
-    <p>اضغط الزر لتسجيل الدخول عبر حساب Google باستخدام Supabase (OAuth).</p><button id="btn-google" class="google">🔐 تسجيل الدخول عبر Google</button>
+    <p>اضغط الزر لتسجيل الدخول عبر حساب Google باستخدام Supabase (OAuth).</p>
+    <button id="btn-google" class="google">🔐 تسجيل الدخول عبر Google</button>
 
-<div id="user-area" class="hidden">
-  <div class="profile">
-    <img id="avatar" class="avatar" src="" alt="avatar" />
-    <div>
-      <div id="user-email" style="font-weight:700"></div>
-      <small id="user-name"></small>
+    <div id="user-area" class="hidden">
+      <div class="profile">
+        <img id="avatar" class="avatar" src="" alt="avatar" />
+        <div>
+          <div id="user-email" style="font-weight:700"></div>
+          <small id="user-name"></small>
+        </div>
+      </div>
+      <button id="btn-logout" class="logout">تسجيل الخروج</button>
+      <button id="btn-delete" class="logout" style="background:#c0392b;margin-top:8px">حذف الحساب</button>
     </div>
+
+    <hr style="margin:18px 0" />
+    <small>ملاحظة: تأكد من إضافة عنوان التوجيه (Redirect URL) في إعدادات Supabase Authentication ليتوافق مع موقعك.</small>
+    <p style="margin-top:8px"><a class="config" target="_blank" href="https://app.supabase.com/project/pbfaysesdyqtxosfajle/auth/settings">فتح إعدادات المصادقة في Supabase</a></p>
   </div>
-  <button id="btn-logout" class="logout">تسجيل الخروج</button>
-</div>
 
-<hr style="margin:18px 0" />
-<small>ملاحظة: تأكد من إضافة عنوان التوجيه (Redirect URL) في إعدادات Supabase Authentication ليتوافق مع موقعك.</small>
-<p style="margin-top:8px"><a class="config" target="_blank" href="https://app.supabase.com/project/pbfaysesdyqtxosfajle/auth/settings">فتح إعدادات المصادقة في Supabase</a></p>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-  </div>  <script type="module">
-    // استبدل المتغيرات التالية بما أرسلتها
     const SUPABASE_URL = 'https://pbfaysesdyqtxosfajle.supabase.co'
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiZmF5c2VzZHlxdHhvc2ZhamxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyOTkwNzIsImV4cCI6MjA3Mzg3NTA3Mn0.frTWR3eGYH6Yh0VVojOwM-vdQfTxDFIKpaMXUDAi2og'
 
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-    // عناصر الواجهة
     const btnGoogle = document.getElementById('btn-google')
     const btnLogout = document.getElementById('btn-logout')
+    const btnDelete = document.getElementById('btn-delete')
     const userArea = document.getElementById('user-area')
     const avatar = document.getElementById('avatar')
     const userEmail = document.getElementById('user-email')
     const userName = document.getElementById('user-name')
 
-    // تسجيل الدخول عبر Google (OAuth)
+    // تسجيل الدخول عبر Google
     btnGoogle.addEventListener('click', async () => {
-      // يمكنك تعديل redirectTo لو أردت رابطًا مختلفًا
       const redirectTo = window.location.origin + window.location.pathname
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo }
       })
-
-      if (error) {
-        alert('حدث خطأ أثناء بدء عملية تسجيل الدخول: ' + error.message)
-        console.error(error)
-      } else {
-        // غالبًا سيتم توجيه المستخدم إلى صفحة Google
-        console.log('تم بدء عملية OAuth', data)
-      }
+      if (error) { alert('حدث خطأ: ' + error.message); console.error(error) }
     })
 
     // تسجيل الخروج
@@ -82,42 +75,57 @@
       updateUI(null)
     })
 
-    // عند العودة من OAuth: الحصول على الجلسة من عنوان URL
-    // supabase.auth.getSessionFromUrl() يُستخدم عندما تستخدم إعادة التوجيه (redirect)
+    // حذف الحساب (يتصل بـ Edge Function)
+    btnDelete.addEventListener('click', async () => {
+      if (!confirm('هل أنت متأكد من حذف حسابك نهائيًا؟')) return;
+      const session = supabase.auth.getSession()
+      const user = (await session).data?.session?.user
+      if (!user) return alert('لم يتم العثور على المستخدم.')
+
+      try {
+        const res = await fetch('https://pbfaysesdyqtxosfajle.supabase.co/functions/v1/delete-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: user.id })
+        })
+        const result = await res.json()
+        if (res.ok) {
+          alert('تم حذف الحساب بنجاح.')
+          updateUI(null)
+        } else {
+          alert('خطأ: ' + result.error)
+        }
+      } catch (err) {
+        alert('حدث خطأ: ' + err.message)
+      }
+    })
+
+    // عند العودة من OAuth
     async function handleRedirect() {
       try {
         const { data, error } = await supabase.auth.getSessionFromUrl({ storeSession: true })
-        if (error) {
-          // ليس شرطًا أن يكون هناك خطأ — يكون هذا النداء مفيدًا فقط إذا كان هناك بيانات في عنوان URL
-          console.log('getSessionFromUrl:', error.message)
-        } else {
-          console.log('تم استرجاع الجلسة من URL', data)
-        }
-      } catch (err) {
-        console.warn('handleRedirect:', err.message || err)
-      }
+        if (error) console.log('getSessionFromUrl:', error.message)
+      } catch (err) { console.warn('handleRedirect:', err) }
     }
 
-    // مراقبة تغيير حالة المصادقة
+    // مراقبة المصادقة
     supabase.auth.onAuthStateChange((event, session) => {
-      console.log('onAuthStateChange', event, session)
       updateUI(session ? session.user : null)
     })
 
-    // فحص الجلسة عند تحميل الصفحة
+    // فحص الجلسة عند التحميل
     async function checkSession() {
       const { data: { session }, error } = await supabase.auth.getSession()
       if (error) console.warn('getSession error', error)
       updateUI(session ? session.user : null)
     }
 
-    // تحديث واجهة المستخدم
     function updateUI(user) {
       if (user) {
         userArea.classList.remove('hidden')
         btnGoogle.classList.add('hidden')
         avatar.src = user.user_metadata?.avatar_url || user.user_metadata?.picture || 'https://www.gravatar.com/avatar?d=mp'
-        userEmail.textContent = user.email || user.user_metadata?.email || user.user_metadata?.preferred_username || ''
+        userEmail.textContent = user.email || user.user_metadata?.email || ''
         userName.textContent = user.user_metadata?.full_name || user.user_metadata?.name || ''
       } else {
         userArea.classList.add('hidden')
@@ -128,13 +136,7 @@
       }
     }
 
-    // تنفيذ عند التحميل
-    (async () => {
-      // إذا عاد OAuth إلى هذه الصفحة مع بيانات في URL
-      await handleRedirect()
-      // ثم تحقق من الجلسة الحالية
-      await checkSession()
-    })()
-
-  </script></body>
+    (async () => { await handleRedirect(); await checkSession() })()
+  </script>
+</body>
 </html>
