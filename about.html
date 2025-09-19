@@ -1,121 +1,140 @@
-<!DOCTYPE html>
+<!doctype html>
+
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الشركة التخصصية الحديثة - من نحن</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/auth.css">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تسجيل دخول عبر Google - Supabase</title>
+  <style>
+    body{font-family: Tahoma, Arial, sans-serif;background:#f5f7fb;color:#222;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
+    .card{width:380px;padding:24px;border-radius:12px;background:#fff;box-shadow:0 6px 24px rgba(20,20,60,.08);text-align:center}
+    h1{font-size:20px;margin:0 0 12px}
+    p{margin:6px 0 18px;color:#555}
+    button{cursor:pointer;padding:10px 14px;border-radius:8px;border:0;font-weight:600}
+    .google{background:#fff;border:1px solid #ddd}
+    .logout{background:#e74c3c;color:#fff;width:100%}
+    .hidden{display:none}
+    .profile{display:flex;gap:12px;align-items:center;justify-content:center;margin:12px 0}
+    .avatar{width:56px;height:56px;border-radius:50%;object-fit:cover}
+    small{display:block;color:#888;margin-top:8px}
+    a.config{font-size:12px;color:#3498db;text-decoration:none}
+  </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <div class="logo">
-                <img src="images/logo.png" alt="شعار الشركة التخصصية الحديثة">
-                <h1>الشركة التخصصية الحديثة<br><span>للخدمات الطبية الهندسية</span></h1>
-            </div>
-            <nav>
-                <ul>
-                    <li><a href="index.html">الرئيسية</a></li>
-                    <li><a href="works.html">أعمالنا</a></li>
-                    <li class="active"><a href="about.html">من نحن</a></li>
-                    <li><a href="privacy.html">سياسة الخصوصية</a></li>
-                </ul>
-            </nav>
-            <div class="auth-buttons">
-                <button id="signInButton" class="btn btn-primary">تسجيل الدخول</button>
-                <button id="signOutButton" class="btn btn-secondary" style="display: none;">تسجيل الخروج</button>
-                <div id="userProfile" style="display: none;">
-                    <img id="userAvatar" src="" alt="صورة المستخدم">
-                    <span id="userName"></span>
-                </div>
-            </div>
-        </div>
-    </header>
+  <div class="card">
+    <h1>تسجيل الدخول بواسطة Google</h1>
+    <p>اضغط الزر لتسجيل الدخول عبر حساب Google باستخدام Supabase (OAuth).</p><button id="btn-google" class="google">🔐 تسجيل الدخول عبر Google</button>
 
-    <main class="container">
-        <section class="about-section">
-            <h2 class="section-title">من نحن</h2>
-            
-            <div class="about-content">
-                <div class="about-image">
-                    <img src="images/about-us.jpg" alt="عن الشركة">
-                </div>
-                <div class="about-text">
-                    <h3>رؤيتنا</h3>
-                    <p>أن نكون الرواد في تقديم الحلول الهندسية الطبية المتكاملة في المنطقة، من خلال الابتكار والجودة والتميز في الخدمة.</p>
-                    
-                    <h3>رسالتنا</h3>
-                    <p>توفير حلول هندسية طبية متكاملة وعالية الجودة تلبي احتياجات القطاع الصحي، من خلال فريق من الخبراء وأحدث التقنيات.</p>
-                    
-                    <h3>قيمنا</h3>
-                    <ul>
-                        <li><strong>الجودة:</strong> نلتزم بأعلى معايير الجودة في جميع خدماتنا.</li>
-                        <li><strong>الابتكار:</strong> نبحث دائمًا عن الحلول المبتكرة والمتطورة.</li>
-                        <li><strong>النزاهة:</strong> نعمل بشفافية وأخلاقيات مهنية عالية.</li>
-                        <li><strong>خدمة العملاء:</strong> نضع احتياجات عملائنا في صلب أولوياتنا.</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="team-section">
-                <h3>فريقنا</h3>
-                <div class="team-members">
-                    <div class="team-member">
-                        <img src="images/team1.jpg" alt="عضو الفريق">
-                        <h4>د. حسين محمد</h4>
-                        <p>المدير العام</p>
-                    </div>
-                    <div class="team-member">
-                        <img src="images/team2.jpg" alt="عضو الفريق">
-                        <h4>م. أحمد علي</h4>
-                        <p>رئيس قسم الهندسة</p>
-                    </div>
-                    <div class="team-member">
-                        <img src="images/team3.jpg" alt="عضو الفريق">
-                        <h4>د. سارة خالد</h4>
-                        <p>استشارية طبية</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+<div id="user-area" class="hidden">
+  <div class="profile">
+    <img id="avatar" class="avatar" src="" alt="avatar" />
+    <div>
+      <div id="user-email" style="font-weight:700"></div>
+      <small id="user-name"></small>
+    </div>
+  </div>
+  <button id="btn-logout" class="logout">تسجيل الخروج</button>
+</div>
 
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>عن الشركة</h3>
-                    <p>الشركة التخصصية الحديثة للخدمات الطبية الهندسية تقدم حلولاً متكاملة في مجال الهندسة الطبية منذ عام 2010.</p>
-                </div>
-                <div class="footer-section">
-                    <h3>روابط سريعة</h3>
-                    <ul>
-                        <li><a href="index.html">الرئيسية</a></li>
-                        <li><a href="works.html">أعمالنا</a></li>
-                        <li><a href="about.html">من نحن</a></li>
-                        <li><a href="privacy.html">سياسة الخصوصية</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>تواصل معنا</h3>
-                    <p><i class="fas fa-phone"></i> +966 12 345 6789</p>
-                    <p><i class="fas fa-envelope"></i> info@modern-specialized.com</p>
-                </div>
-            </div>
-            <div class="copyright">
-                <p>&copy; 2023 الشركة التخصصية الحديثة للخدمات الطبية الهندسية. جميع الحقوق محفوظة.</p>
-            </div>
-        </div>
-    </footer>
+<hr style="margin:18px 0" />
+<small>ملاحظة: تأكد من إضافة عنوان التوجيه (Redirect URL) في إعدادات Supabase Authentication ليتوافق مع موقعك.</small>
+<p style="margin-top:8px"><a class="config" target="_blank" href="https://app.supabase.com/project/pbfaysesdyqtxosfajle/auth/settings">فتح إعدادات المصادقة في Supabase</a></p>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/main.js"></script>
-</body>
+  </div>  <script type="module">
+    // استبدل المتغيرات التالية بما أرسلتها
+    const SUPABASE_URL = 'https://pbfaysesdyqtxosfajle.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiZmF5c2VzZHlxdHhvc2ZhamxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyOTkwNzIsImV4cCI6MjA3Mzg3NTA3Mn0.frTWR3eGYH6Yh0VVojOwM-vdQfTxDFIKpaMXUDAi2og'
+
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+    // عناصر الواجهة
+    const btnGoogle = document.getElementById('btn-google')
+    const btnLogout = document.getElementById('btn-logout')
+    const userArea = document.getElementById('user-area')
+    const avatar = document.getElementById('avatar')
+    const userEmail = document.getElementById('user-email')
+    const userName = document.getElementById('user-name')
+
+    // تسجيل الدخول عبر Google (OAuth)
+    btnGoogle.addEventListener('click', async () => {
+      // يمكنك تعديل redirectTo لو أردت رابطًا مختلفًا
+      const redirectTo = window.location.origin + window.location.pathname
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo }
+      })
+
+      if (error) {
+        alert('حدث خطأ أثناء بدء عملية تسجيل الدخول: ' + error.message)
+        console.error(error)
+      } else {
+        // غالبًا سيتم توجيه المستخدم إلى صفحة Google
+        console.log('تم بدء عملية OAuth', data)
+      }
+    })
+
+    // تسجيل الخروج
+    btnLogout.addEventListener('click', async () => {
+      const { error } = await supabase.auth.signOut()
+      if (error) return alert('خطأ أثناء تسجيل الخروج: ' + error.message)
+      updateUI(null)
+    })
+
+    // عند العودة من OAuth: الحصول على الجلسة من عنوان URL
+    // supabase.auth.getSessionFromUrl() يُستخدم عندما تستخدم إعادة التوجيه (redirect)
+    async function handleRedirect() {
+      try {
+        const { data, error } = await supabase.auth.getSessionFromUrl({ storeSession: true })
+        if (error) {
+          // ليس شرطًا أن يكون هناك خطأ — يكون هذا النداء مفيدًا فقط إذا كان هناك بيانات في عنوان URL
+          console.log('getSessionFromUrl:', error.message)
+        } else {
+          console.log('تم استرجاع الجلسة من URL', data)
+        }
+      } catch (err) {
+        console.warn('handleRedirect:', err.message || err)
+      }
+    }
+
+    // مراقبة تغيير حالة المصادقة
+    supabase.auth.onAuthStateChange((event, session) => {
+      console.log('onAuthStateChange', event, session)
+      updateUI(session ? session.user : null)
+    })
+
+    // فحص الجلسة عند تحميل الصفحة
+    async function checkSession() {
+      const { data: { session }, error } = await supabase.auth.getSession()
+      if (error) console.warn('getSession error', error)
+      updateUI(session ? session.user : null)
+    }
+
+    // تحديث واجهة المستخدم
+    function updateUI(user) {
+      if (user) {
+        userArea.classList.remove('hidden')
+        btnGoogle.classList.add('hidden')
+        avatar.src = user.user_metadata?.avatar_url || user.user_metadata?.picture || 'https://www.gravatar.com/avatar?d=mp'
+        userEmail.textContent = user.email || user.user_metadata?.email || user.user_metadata?.preferred_username || ''
+        userName.textContent = user.user_metadata?.full_name || user.user_metadata?.name || ''
+      } else {
+        userArea.classList.add('hidden')
+        btnGoogle.classList.remove('hidden')
+        avatar.src = ''
+        userEmail.textContent = ''
+        userName.textContent = ''
+      }
+    }
+
+    // تنفيذ عند التحميل
+    (async () => {
+      // إذا عاد OAuth إلى هذه الصفحة مع بيانات في URL
+      await handleRedirect()
+      // ثم تحقق من الجلسة الحالية
+      await checkSession()
+    })()
+
+  </script></body>
 </html>
