@@ -1,89 +1,146 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>رفع إلى Google Drive</title>
-  <style>
-    body{font-family:system-ui,Segoe UI,Arial;margin:28px auto;max-width:760px;padding:12px}
-    .card{padding:18px;border-radius:8px;border:1px solid #e3e3e3;background:#fff}
-    input[type=file]{display:block;margin:12px 0}
-    button{padding:10px 14px;border-radius:8px;border:0;background:#0366d6;color:#fff;cursor:pointer}
-    .log{white-space:pre-wrap;margin-top:12px;background:#f9f9f9;padding:12px;border-radius:6px;border:1px solid #eee}
-    a.small{font-size:13px;color:#0366d6}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رفع الصور إلى جوجل درايف</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        .upload-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        h3 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        #uploadForm input[type="file"] {
+            display: block;
+            margin: 0 auto 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #uploadForm button {
+            background-color: #4CAF50; /* لون أخضر */
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        #uploadForm button:hover {
+            background-color: #45a049;
+        }
+        #uploadForm button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 1em;
+            color: #555;
+            min-height: 20px; /* لحجز مساحة للرسالة */
+        }
+    </style>
 </head>
 <body>
-  <h2>رفع ملف إلى حسابي على Google Drive</h2>
-  <div class="card">
-    <p>اختر ملف ثم اضغط على <strong>ارفع الملف</strong>. سيتم تخزين الملف داخل مجلدي على Google Drive.</p>
 
-    <input id="fileEl" type="file" />
-    <!-- ضع هنا التوكن السري نفسه الموجود في Code.gs -->
-    <input id="token" type="text" placeholder="ضع التوكن هنا" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd" />
-    <div style="margin-top:10px">
-      <button id="uploadBtn">ارفع الملف</button>
+    <div class="upload-container">
+        <h3>رفع صورة إلى جوجل درايف</h3>
+        <form id="uploadForm">
+            <!-- حقل اختيار الملف، يقبل الصور فقط -->
+            <input type="file" name="myFile" id="fileInput" accept="image/*" required>
+            <button type="submit" id="submitButton">رفع الصورة</button>
+        </form>
+        <!-- هنا ستظهر رسائل الحالة (جاري الرفع، تم بنجاح، خطأ) -->
+        <div id="status"></div>
     </div>
 
-    <div class="log" id="log">جاهز للرفع…</div>
-    <p style="margin-top:8px"><a class="small" href="https://script.google.com/macros/s/AKfycbwF4E7Sgm6ZJ56VuF6KzOZ0rzw1HIiIzfs2qZEjEh9WdCbuB0xXthhja_QpDxOqAm5-fw/exec" target="_blank">رابط Web App (اختياري لفتح)</a></p>
-  </div>
+    <script>
+        const uploadForm = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+        const statusDiv = document.getElementById('status');
+        const submitButton = document.getElementById('submitButton');
 
-<script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwF4E7Sgm6ZJ56VuF6KzOZ0rzw1HIiIzfs2qZEjEh9WdCbuB0xXthhja_QpDxOqAm5-fw/exec";
+        uploadForm.addEventListener('submit', function (e) {
+            e.preventDefault(); // منع الإرسال الافتراضي للنموذج
 
-function log(msg){
-  const el = document.getElementById('log');
-  el.textContent = msg + "\n\n" + el.textContent;
-}
+            const file = fileInput.files[0];
+            if (!file) {
+                statusDiv.innerText = 'الرجاء اختيار ملف أولاً.';
+                return;
+            }
 
-document.getElementById('uploadBtn').addEventListener('click', async () => {
-  const f = document.getElementById('fileEl').files[0];
-  const token = document.getElementById('token').value.trim();
+            // هذا هو رابط السكربت الخاص بك
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbxThCw6iLBF0XOxnmOL4fVX0R0LyfLVj1F0D_Y8fp3qVSidSwlF3-h0j2fCpj1ghPJp/exec';
+            
+            const reader = new FileReader();
+            reader.readAsDataURL(file); // قراءة الملف لتحويله إلى نص مشفر (Base64)
 
-  if (!f) { alert('اختَر ملفًا أولاً'); return; }
-  if (!token) { if(!confirm('لم تدخل توكن. الاستمرار بدون توكن قد يفشل. موافق؟')) return; }
+            reader.onload = function (event) {
+                const fileData = event.target.result.split(',');
+                const payload = {
+                    filename: file.name,
+                    mimetype: file.type,
+                    data: fileData[1] // الجزء الثاني من النص المشفر هو البيانات الفعلية
+                };
 
-  log('قراءة الملف...');
-  const reader = new FileReader();
-  reader.onload = async function(e){
-    try{
-      const dataUrl = e.target.result;
-      const comma = dataUrl.indexOf(',');
-      const base64 = dataUrl.substring(comma+1);
-      const payload = {
-        filename: f.name,
-        mimeType: f.type || 'application/octet-stream',
-        base64: base64,
-        token: token
-      };
+                // تحديث واجهة المستخدم
+                statusDiv.innerText = 'جاري رفع الملف، يرجى الانتظار...';
+                submitButton.disabled = true; // تعطيل الزر لمنع الضغط المتكرر
+                submitButton.innerText = 'جاري الرفع...';
 
-      log('إرسال إلى الخادم...');
-      const res = await fetch(WEB_APP_URL, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(payload)
-      });
+                // إرسال البيانات إلى Google Apps Script
+                fetch(scriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data); // لطباعة استجابة السكربت في الكونسول للتصحيح
+                    if (data.status === 'success') {
+                        statusDiv.innerText = 'تم رفع الملف بنجاح!';
+                        uploadForm.reset(); // مسح النموذج بعد النجاح
+                    } else {
+                        // عرض رسالة الخطأ التي تأتي من السكربت
+                        statusDiv.innerText = 'حدث خطأ: ' + data.message;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    statusDiv.innerText = 'فشل الاتصال بالخادم. تأكد من اتصالك بالإنترنت أو تحقق من رابط السكربت.';
+                })
+                .finally(() => {
+                    // إعادة تفعيل الزر وتغيير نصه في كل الحالات (نجاح أو فشل)
+                    submitButton.disabled = false;
+                    submitButton.innerText = 'رفع الصورة';
+                });
+            };
 
-      const j = await res.json();
-      if (j.ok) {
-        log('تم الرفع بنجاح!\nاسم الملف: ' + j.name + '\nرابط: ' + j.url);
-        const a = document.createElement('a');
-        a.href = j.url;
-        a.textContent = 'فتح الملف في Drive';
-        a.target = '_blank';
-        a.style.display = 'block';
-        a.style.marginTop = '8px';
-        document.querySelector('.card').appendChild(a);
-      } else {
-        log('خطأ أثناء الرفع: ' + (j.error || JSON.stringify(j)));
-      }
-    } catch(err){
-      log('حدث خطأ: ' + err);
-    }
-  };
-  reader.readAsDataURL(f);
-});
-</script>
+            reader.onerror = function() {
+                statusDiv.innerText = 'حدث خطأ أثناء قراءة الملف.';
+            };
+        });
+    </script>
+
 </body>
 </html>
