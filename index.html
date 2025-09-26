@@ -31,7 +31,7 @@
             font-size: 1.5rem;
         }
         #uploadForm input[type="file"] {
-            display: none; /* إخفاء حقل الإدخال الافتراضي */
+            display: none;
         }
         .file-label {
             background-color: #e7f3ff;
@@ -53,7 +53,7 @@
             min-height: 20px;
         }
         #submitButton {
-            background-color: #28a745; /* لون أخضر للنجاح */
+            background-color: #28a745;
             color: white;
             padding: 12px 20px;
             border: none;
@@ -64,15 +64,9 @@
             width: 100%;
             transition: background-color 0.3s, transform 0.1s;
         }
-        #submitButton:hover {
-            background-color: #218838;
-        }
         #submitButton:disabled {
             background-color: #94d3a2;
             cursor: not-allowed;
-        }
-        #submitButton:active {
-            transform: scale(0.98);
         }
         #status {
             margin-top: 1.5rem;
@@ -83,6 +77,25 @@
         .status-success { color: #28a745; }
         .status-error { color: #dc3545; }
         .status-progress { color: #007bff; }
+        
+        /* --- جديد: تنسيق قسم عرض الرابط --- */
+        #result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            display: none; /* سيتم إظهاره عبر JavaScript */
+            word-wrap: break-word; /* لضمان عدم خروج الرابط الطويل عن الإطار */
+        }
+        #result a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        #result a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -97,6 +110,9 @@
             <button type="submit" id="submitButton">رفع الصورة</button>
         </form>
         <div id="status"></div>
+
+        <!-- --- جديد: هذا القسم سيعرض رابط الملف بعد رفعه --- -->
+        <div id="result"></div>
     </div>
 
     <script>
@@ -105,11 +121,13 @@
         const statusDiv = document.getElementById('status');
         const submitButton = document.getElementById('submitButton');
         const fileNameDiv = document.getElementById('fileName');
+        const resultDiv = document.getElementById('result'); // --- جديد: جلب عنصر عرض الرابط
 
-        // عرض اسم الملف المختار
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
                 fileNameDiv.textContent = fileInput.files[0].name;
+                resultDiv.style.display = 'none'; // إخفاء الرابط القديم عند اختيار ملف جديد
+                statusDiv.textContent = '';
             } else {
                 fileNameDiv.textContent = 'لم يتم اختيار أي ملف';
             }
@@ -117,47 +135,39 @@
 
         uploadForm.addEventListener('submit', function (e) {
             e.preventDefault();
-
             const file = fileInput.files[0];
-            if (!file) {
-                statusDiv.textContent = 'الرجاء اختيار ملف أولاً.';
-                statusDiv.className = 'status-error';
-                return;
-            }
+            if (!file) { /* ... الكود كما هو ... */ return; }
 
-            // ===============================================================
-            // !! هام !!
-            // هذا هو رابط السكربت الخاص بك. تأكد من أنه صحيح.
-            const scriptURL ='https://script.google.com/macros/s/AKfycbzciFhn0bNq5qEvUr4JL--v5bCtqXb-E7zZdAirnpnRgildo1xQsLKAXElZxqWs3XS8DQ/exec';
-            // ===============================================================
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbxThCw6iLBF0XOxnmOL4fVX0R0LyfLVj1F0D_Y8fp3qVSidSwlF3-h0j2fCpj1ghPJp/exec';
             
             const reader = new FileReader();
             reader.readAsDataURL(file);
 
             reader.onload = function (event) {
                 const fileData = event.target.result.split(',');
-                const payload = {
-                    filename: file.name,
-                    mimetype: file.type,
-                    data: fileData[1]
-                };
+                const payload = { filename: file.name, mimetype: file.type, data: fileData[1] };
 
-                // تحديث واجهة المستخدم
                 statusDiv.textContent = 'جاري رفع الملف، يرجى الانتظار...';
                 statusDiv.className = 'status-progress';
                 submitButton.disabled = true;
                 submitButton.textContent = 'جاري الرفع...';
+                resultDiv.style.display = 'none'; // إخفاء الرابط أثناء الرفع
 
-                fetch(scriptURL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                })
+                fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) })
                 .then(res => res.json())
                 .then(data => {
                     console.log(data);
                     if (data.status === 'success') {
                         statusDiv.textContent = 'تم الرفع بنجاح!';
                         statusDiv.className = 'status-success';
+                        
+                        // --- جديد: عرض رابط الملف الذي تم رفعه ---
+                        resultDiv.style.display = 'block'; // إظهار قسم الرابط
+                        resultDiv.innerHTML = `
+                            <p>رابط الملف:</p>
+                            <a href="${data.fileUrl}" target="_blank">${data.fileUrl}</a>
+                        `;
+                        
                         uploadForm.reset();
                         fileNameDiv.textContent = 'لم يتم اختيار أي ملف';
                     } else {
@@ -175,11 +185,7 @@
                     submitButton.textContent = 'رفع الصورة';
                 });
             };
-
-            reader.onerror = function() {
-                statusDiv.textContent = 'حدث خطأ أثناء قراءة الملف.';
-                statusDiv.className = 'status-error';
-            };
+            reader.onerror = function() { /* ... الكود كما هو ... */ };
         });
     </script>
 
