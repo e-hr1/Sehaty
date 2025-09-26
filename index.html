@@ -16,7 +16,7 @@
 <body>
   <h2>رفع ملف إلى حسابي على Google Drive</h2>
   <div class="card">
-    <p>اختر ملف ثم اضغط على <strong>ارفع الملف</strong>. سيتم تخزين الملف داخل مجلدك في Google Drive.</p>
+    <p>اختر ملف ثم اضغط على <strong>ارفع الملف</strong>. سيتم تخزين الملف داخل مجلدي على Google Drive.</p>
 
     <input id="fileEl" type="file" />
     <!-- ضع هنا التوكن السري نفسه الموجود في Code.gs -->
@@ -26,11 +26,11 @@
     </div>
 
     <div class="log" id="log">جاهز للرفع…</div>
-    <p style="margin-top:8px"><a class="small" href="https://script.google.com/macros/s/AKfycbwvcngo-R9t2bZizi7la0LDI09xcVC7jy3B6JBm94LtVuXYXbFFdq4dZwLzAdt_36Z7FA/exec" target="_blank">رابط Web App (اختياري لفتح)</a></p>
+    <p style="margin-top:8px"><a class="small" href="https://script.google.com/macros/s/AKfycbwF4E7Sgm6ZJ56VuF6KzOZ0rzw1HIiIzfs2qZEjEh9WdCbuB0xXthhja_QpDxOqAm5-fw/exec" target="_blank">رابط Web App (اختياري لفتح)</a></p>
   </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwvcngo-R9t2bZizi7la0LDI09xcVC7jy3B6JBm94LtVuXYXbFFdq4dZwLzAdt_36Z7FA/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwF4E7Sgm6ZJ56VuF6KzOZ0rzw1HIiIzfs2qZEjEh9WdCbuB0xXthhja_QpDxOqAm5-fw/exec";
 
 function log(msg){
   const el = document.getElementById('log');
@@ -68,7 +68,6 @@ document.getElementById('uploadBtn').addEventListener('click', async () => {
       const j = await res.json();
       if (j.ok) {
         log('تم الرفع بنجاح!\nاسم الملف: ' + j.name + '\nرابط: ' + j.url);
-        // عرض الرابط قابل للضغط
         const a = document.createElement('a');
         a.href = j.url;
         a.textContent = 'فتح الملف في Drive';
