@@ -6,60 +6,83 @@
     <title>رفع الصور إلى جوجل درايف</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            background-color: #f4f4f9;
+            background-color: #f0f2f5;
         }
         .upload-container {
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
             text-align: center;
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
+            border: 1px solid #e0e0e0;
         }
         h3 {
-            color: #333;
-            margin-bottom: 20px;
+            color: #1c1e21;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
         }
         #uploadForm input[type="file"] {
-            display: block;
-            margin: 0 auto 20px;
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 5px;
-            width: 100%;
-            box-sizing: border-box;
+            display: none; /* إخفاء حقل الإدخال الافتراضي */
         }
-        #uploadForm button {
-            background-color: #4CAF50; /* لون أخضر */
+        .file-label {
+            background-color: #e7f3ff;
+            color: #1877f2;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: block;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        .file-label:hover {
+            background-color: #dceafc;
+        }
+        #fileName {
+            color: #606770;
+            margin-bottom: 1.5rem;
+            min-height: 20px;
+        }
+        #submitButton {
+            background-color: #28a745; /* لون أخضر للنجاح */
             color: white;
             padding: 12px 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 1rem;
+            font-weight: 600;
             width: 100%;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.1s;
         }
-        #uploadForm button:hover {
-            background-color: #45a049;
+        #submitButton:hover {
+            background-color: #218838;
         }
-        #uploadForm button:disabled {
-            background-color: #ccc;
+        #submitButton:disabled {
+            background-color: #94d3a2;
             cursor: not-allowed;
         }
-        #status {
-            margin-top: 20px;
-            font-size: 1em;
-            color: #555;
-            min-height: 20px; /* لحجز مساحة للرسالة */
+        #submitButton:active {
+            transform: scale(0.98);
         }
+        #status {
+            margin-top: 1.5rem;
+            font-size: 1em;
+            font-weight: 500;
+            min-height: 22px;
+        }
+        .status-success { color: #28a745; }
+        .status-error { color: #dc3545; }
+        .status-progress { color: #007bff; }
     </style>
 </head>
 <body>
@@ -67,11 +90,12 @@
     <div class="upload-container">
         <h3>رفع صورة إلى جوجل درايف</h3>
         <form id="uploadForm">
-            <!-- حقل اختيار الملف، يقبل الصور فقط -->
+            <label for="fileInput" class="file-label">اختر صورة...</label>
             <input type="file" name="myFile" id="fileInput" accept="image/*" required>
+            <div id="fileName">لم يتم اختيار أي ملف</div>
+            
             <button type="submit" id="submitButton">رفع الصورة</button>
         </form>
-        <!-- هنا ستظهر رسائل الحالة (جاري الرفع، تم بنجاح، خطأ) -->
         <div id="status"></div>
     </div>
 
@@ -80,64 +104,81 @@
         const fileInput = document.getElementById('fileInput');
         const statusDiv = document.getElementById('status');
         const submitButton = document.getElementById('submitButton');
+        const fileNameDiv = document.getElementById('fileName');
+
+        // عرض اسم الملف المختار
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                fileNameDiv.textContent = fileInput.files[0].name;
+            } else {
+                fileNameDiv.textContent = 'لم يتم اختيار أي ملف';
+            }
+        });
 
         uploadForm.addEventListener('submit', function (e) {
-            e.preventDefault(); // منع الإرسال الافتراضي للنموذج
+            e.preventDefault();
 
             const file = fileInput.files[0];
             if (!file) {
-                statusDiv.innerText = 'الرجاء اختيار ملف أولاً.';
+                statusDiv.textContent = 'الرجاء اختيار ملف أولاً.';
+                statusDiv.className = 'status-error';
                 return;
             }
 
-            // هذا هو رابط السكربت الخاص بك
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbxThCw6iLBF0XOxnmOL4fVX0R0LyfLVj1F0D_Y8fp3qVSidSwlF3-h0j2fCpj1ghPJp/exec';
+            // ===============================================================
+            // !! هام !!
+            // هذا هو رابط السكربت الخاص بك. تأكد من أنه صحيح.
+            const scriptURL ='https://script.google.com/macros/s/AKfycbzciFhn0bNq5qEvUr4JL--v5bCtqXb-E7zZdAirnpnRgildo1xQsLKAXElZxqWs3XS8DQ/exec';
+            // ===============================================================
             
             const reader = new FileReader();
-            reader.readAsDataURL(file); // قراءة الملف لتحويله إلى نص مشفر (Base64)
+            reader.readAsDataURL(file);
 
             reader.onload = function (event) {
                 const fileData = event.target.result.split(',');
                 const payload = {
                     filename: file.name,
                     mimetype: file.type,
-                    data: fileData[1] // الجزء الثاني من النص المشفر هو البيانات الفعلية
+                    data: fileData[1]
                 };
 
                 // تحديث واجهة المستخدم
-                statusDiv.innerText = 'جاري رفع الملف، يرجى الانتظار...';
-                submitButton.disabled = true; // تعطيل الزر لمنع الضغط المتكرر
-                submitButton.innerText = 'جاري الرفع...';
+                statusDiv.textContent = 'جاري رفع الملف، يرجى الانتظار...';
+                statusDiv.className = 'status-progress';
+                submitButton.disabled = true;
+                submitButton.textContent = 'جاري الرفع...';
 
-                // إرسال البيانات إلى Google Apps Script
                 fetch(scriptURL, {
                     method: 'POST',
                     body: JSON.stringify(payload)
                 })
                 .then(res => res.json())
                 .then(data => {
-                    console.log(data); // لطباعة استجابة السكربت في الكونسول للتصحيح
+                    console.log(data);
                     if (data.status === 'success') {
-                        statusDiv.innerText = 'تم رفع الملف بنجاح!';
-                        uploadForm.reset(); // مسح النموذج بعد النجاح
+                        statusDiv.textContent = 'تم الرفع بنجاح!';
+                        statusDiv.className = 'status-success';
+                        uploadForm.reset();
+                        fileNameDiv.textContent = 'لم يتم اختيار أي ملف';
                     } else {
-                        // عرض رسالة الخطأ التي تأتي من السكربت
-                        statusDiv.innerText = 'حدث خطأ: ' + data.message;
+                        statusDiv.textContent = 'حدث خطأ: ' + data.message;
+                        statusDiv.className = 'status-error';
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    statusDiv.innerText = 'فشل الاتصال بالخادم. تأكد من اتصالك بالإنترنت أو تحقق من رابط السكربت.';
+                    statusDiv.textContent = 'فشل الاتصال بالخادم. تحقق من رابط السكربت أو أذوناته.';
+                    statusDiv.className = 'status-error';
                 })
                 .finally(() => {
-                    // إعادة تفعيل الزر وتغيير نصه في كل الحالات (نجاح أو فشل)
                     submitButton.disabled = false;
-                    submitButton.innerText = 'رفع الصورة';
+                    submitButton.textContent = 'رفع الصورة';
                 });
             };
 
             reader.onerror = function() {
-                statusDiv.innerText = 'حدث خطأ أثناء قراءة الملف.';
+                statusDiv.textContent = 'حدث خطأ أثناء قراءة الملف.';
+                statusDiv.className = 'status-error';
             };
         });
     </script>
